@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: Claude Code ${{ matrix.claude-code }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The pinned build is the one the plugin is tested against; `latest` warns early
+        # when the early-access function-hooks API changes under it.
+        claude-code: ['2.1.292', 'latest']
+    continue-on-error: ${{ matrix.claude-code == 'latest' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --global @anthropic-ai/claude-code@${{ matrix.claude-code }}
+      - run: claude plugin validate --strict .
+      - run: claude plugin test .
+      - name: Type-check
+        run: |
+          # The engine writes its type declarations into .claude-plugin/types whenever it loads
+          # the plugin, and a session with no login still loads it before stopping.
+          timeout 60 claude -p --plugin-dir . "ok" || true
+          npx --yes --package typescript@5 tsc -p .
