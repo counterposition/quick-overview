@@ -1,0 +1,114 @@
+{
+  "name": "fast-overview",
+  "version": "0.2.0",
+  "description": "While Claude works on a conversational question, shows a fast overview card from a fast inference provider (Cerebras, Groq or OpenRouter)",
+  "author": {
+    "name": "Harish Kukreja"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "openrouter_api_key": {
+      "type": "string",
+      "title": "OpenRouter API key",
+      "description": "One key for everything: the overview model and every classifier. Enough on its own.",
+      "sensitive": true,
+      "required": false
+    },
+    "cerebras_api_key": {
+      "type": "string",
+      "title": "Cerebras API key",
+      "description": "Optional. Calls Cerebras directly, about 50 ms faster than through OpenRouter.",
+      "sensitive": true,
+      "required": false
+    },
+    "groq_api_key": {
+      "type": "string",
+      "title": "Groq API key",
+      "description": "Optional. Calls Groq directly for overview cards.",
+      "sensitive": true,
+      "required": false
+    },
+    "typesafe_api_key": {
+      "type": "string",
+      "title": "TypeSafe API key",
+      "description": "Optional. Calls the Jev classifier directly, about 100 ms faster than through OpenRouter.",
+      "sensitive": true,
+      "required": false
+    },
+    "liquid_api_key": {
+      "type": "string",
+      "title": "Liquid AI API key",
+      "description": "Optional. Calls the d1 classifier directly.",
+      "sensitive": true,
+      "required": false
+    },
+    "openai_api_key": {
+      "type": "string",
+      "title": "OpenAI API key",
+      "description": "Optional. Calls the GPT-6 Luna Decisions classifier directly.",
+      "sensitive": true,
+      "required": false
+    },
+    "mode": {
+      "type": "string",
+      "title": "When to show an overview",
+      "description": "auto: a classifier decides, only for questions you'll read a long answer to. always: every prompt. off: never.",
+      "options": [
+        "auto",
+        "always",
+        "off"
+      ],
+      "default": "auto"
+    },
+    "overview_provider": {
+      "type": "string",
+      "title": "Overview provider",
+      "description": "Who writes the card. auto: the fastest one you have a key for (Cerebras, then Groq, then OpenRouter).",
+      "options": [
+        "auto",
+        "cerebras",
+        "groq",
+        "openrouter"
+      ],
+      "default": "auto"
+    },
+    "overview_model": {
+      "type": "string",
+      "title": "Overview model",
+      "description": "Leave empty for Qwen3.8-27B, or name a model your provider serves.",
+      "default": ""
+    },
+    "classifier": {
+      "type": "string",
+      "title": "Classifier",
+      "description": "Decides which prompts get a card. auto: Jev, then d1, then the overview model itself. Each runs directly with its own key, else through OpenRouter.",
+      "options": [
+        "auto",
+        "jev",
+        "d1",
+        "clef",
+        "clef-flash",
+        "luna",
+        "overview-model"
+      ],
+      "default": "auto"
+    },
+    "share_project": {
+      "type": "boolean",
+      "title": "Share project context",
+      "description": "Send the repository's file map and the opening of README, AGENTS.md, CLAUDE.md and manifests to the providers, so cards about your code are accurate.",
+      "default": true
+    },
+    "log": {
+      "type": "string",
+      "title": "Logging",
+      "description": "off: nothing is written. ratings: verdicts, timings and your ratings. full: also prompts, cards and Claude's answers. Logs go to ~/.local/state/fast-overview.",
+      "options": [
+        "off",
+        "ratings",
+        "full"
+      ],
+      "default": "off"
+    }
+  }
+}

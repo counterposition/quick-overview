@@ -1,0 +1,5 @@
+.env
+.claude-plugin/types/
+node_modules/
+.claude/
+.DS_Store
