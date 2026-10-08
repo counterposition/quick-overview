@@ -47,13 +47,13 @@ You can also set keys as environment variables: `OPENROUTER_API_KEY`, `CEREBRAS_
 
 - `/overview` shows the mode, the card provider and the classifier. `/overview auto | always | off` changes the mode.
 - `/plugin` → Installed → fast-overview → **Configure options** changes everything else: keys, provider, model, classifier, project sharing and logging.
-- When Claude finishes, the card collapses to one row. **show** expands it again; **dismiss** removes it. Buttons answer clicks, or hotkeys after ctrl+x tab.
+- When Claude finishes, the card collapses to one row: **show** expands it again, **helpful** / **not helpful** rate it, **dismiss** removes it. Click the buttons; in the terminal, ctrl+x tab also lets you use their hotkeys.
 
 ## Privacy
 
 For prompts that qualify, the card provider receives your prompt, the recent conversation and, unless you turn off **Share project context**, the repository snapshot (file paths and the openings of the key files). For every prompt that isn't a slash command or one word, the classifier receives the prompt and a short excerpt of the conversation. If you use OpenRouter, it sees the same and passes it on. Check each provider's data-retention policy.
 
-Logging is off by default. Turn it on in the options: **ratings** keeps verdicts, timings and your helpful/misleading ratings; **full** also keeps prompts, cards and Claude's answers. Logs go to `~/.local/state/fast-overview/`, or `$FAST_OVERVIEW_LOG_DIR`.
+By default the plugin keeps only your ratings, with the classifier's verdict and timings: no prompts, cards or answers. Set logging to **full** to also keep those, or **off** to keep nothing (cards then offer no rating). Logs go to `~/.local/state/fast-overview/`, or `$FAST_OVERVIEW_LOG_DIR`.
 
 ## License
 

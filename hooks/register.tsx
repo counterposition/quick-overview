@@ -39,7 +39,7 @@ const CARD_TIMEOUT_MS = 4000
 /** How long a project snapshot stays fresh. */
 const SNAPSHOT_TTL_MS = 10 * 60 * 1000
 
-type Rating = 'helpful' | 'misleading'
+type Rating = 'helpful' | 'not-helpful'
 type LogLevel = 'off' | 'ratings' | 'full'
 
 type Config = Settings & { mode: Mode; shareProject: boolean; log: LogLevel; keys: Keys }
@@ -108,7 +108,7 @@ async function loadConfig($: EngineInterface, options: PluginOptions): Promise<C
     overviewModel: nonEmpty(options.overview_model) ?? '',
     classifier: pick(options.classifier, ['auto', 'jev', 'd1', 'clef', 'clef-flash', 'luna', 'overview-model'], 'auto'),
     shareProject: options.share_project !== false,
-    log: pick(options.log, ['off', 'ratings', 'full'], 'off'),
+    log: pick(options.log, ['off', 'ratings', 'full'], 'ratings'),
   }
 
   return config
@@ -336,7 +336,7 @@ async function privacyNotice($: EngineInterface, endpoint: Endpoint, cfg: Config
 async function rate($: EngineInterface, id: string, rating: Rating) {
   await save($, id, { rating })
   await update($, current, c => (c?.id === id ? null : c))
-  $.ui.toast(`Overview marked ${rating}`)
+  $.ui.toast(rating === 'helpful' ? 'Thanks: marked helpful' : 'Thanks: marked not helpful')
 }
 
 /** Changes the plugin's `mode` option as the /config menu would; undefined once written, else why not. */
@@ -452,11 +452,11 @@ export const register: Register = (on, options) => {
     const ratingButtons = card.canRate
       ? [
           <Button key="helpful" hotkey="h" label="helpful" onPress={() => rate($, card.id, 'helpful')} />,
-          <Button key="misleading" hotkey="m" label="misleading" onPress={() => rate($, card.id, 'misleading')} />,
+          <Button key="not-helpful" hotkey="n" label="not helpful" onPress={() => rate($, card.id, 'not-helpful')} />,
         ]
       : []
-    // The hotkeys answer only once the band has the keyboard; a click works too.
-    const keysHint = <Text dimColor>(ctrl+x tab for keys)</Text>
+    // On the terminal the hotkeys answer only once the band has the keyboard; elsewhere buttons are clicked.
+    const keysHint = e.surface === 'terminal' ? <Text dimColor>(ctrl+x tab for keys)</Text> : null
 
     if (!card.isExpanded) {
       return (

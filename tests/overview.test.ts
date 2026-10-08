@@ -128,7 +128,7 @@ describe('the band', () => {
     expect(await ui.find({ key: 'helpful' })).toBeUndefined()
   })
 
-  test('logs nothing and offers no rating by default', { options: { cerebras_api_key: 'c' } }, async ($, on) => {
+  test('logs nothing and offers no rating when logging is off', { options: { cerebras_api_key: 'c', log: 'off' } }, async ($, on) => {
     const { logs, clock } = world(on, { kind: 'concept', explain: 0.8 })
 
     await $.prompt.submit(submit('How do CRDTs converge?'))
@@ -140,6 +140,35 @@ describe('the band', () => {
     expect(await ui.find({ key: 'show' })).toBeDefined()
     expect(await ui.find({ key: 'helpful' })).toBeUndefined()
     expect(logs()).toHaveLength(0)
+  })
+
+  test('rates a card not helpful, keeping no text by default', { options: { cerebras_api_key: 'c' } }, async ($, on) => {
+    const { logs, clock } = world(on, { kind: 'concept', explain: 0.8 })
+
+    await $.prompt.submit(submit('How do CRDTs converge?'))
+    await clock.settle()
+    await $.turn.complete({ answer: 'x', durationMs: 1, isAborted: false, turnId: 't1', reason: 'answer' })
+    await clock.settle()
+
+    const ui = await $.ui.mount(band)
+    await ui.press({ key: 'not-helpful' })
+    const log = logs().at(-1)
+    expect(log).toMatchObject({ rating: 'not-helpful', shown: true, gate: { kind: 'concept' } })
+    expect(log).not.toHaveProperty('prompt')
+    expect(log?.card).not.toHaveProperty('text')
+  })
+
+  test('shows the hotkey hint only on the terminal', { options: DIRECT }, async ($, on) => {
+    const { clock } = world(on, { kind: 'concept', explain: 0.8 })
+
+    await $.prompt.submit(submit('How do CRDTs converge?'))
+    await clock.settle()
+
+    const terminal = await $.ui.mount(band)
+    expect(await terminal.find({ text: 'ctrl+x tab' })).toBeDefined()
+    const desktop = await $.ui.mount({ ...band, surface: 'desktop' })
+    expect((await desktop.find({ type: 'Markdown' }))?.text).toContain('CRDTs merge by math')
+    expect(await desktop.find({ text: 'ctrl+x tab' })).toBeUndefined()
   })
 
   test('stays empty for a task, and never asks for a card', { options: DIRECT }, async ($, on) => {
@@ -311,6 +340,7 @@ describe('the gate', () => {
     expect(decide({ kind: { choice: 'discussion' }, wants_explanation: { noul: 0.6 } }, 'auto').show).toBe(true)
     expect(decide({ kind: { choice: 'concept' }, wants_explanation: { noul: 0.3 } }, 'auto').show).toBe(false)
     expect(decide({ kind: { choice: 'task' }, wants_explanation: { noul: 0.9 } }, 'auto').show).toBe(false)
+    expect(decide({ kind: { choice: 'lookup' }, wants_explanation: { noul: 0.9 } }, 'auto').show).toBe(false)
     expect(decide({ kind: { choice: 'task' }, wants_explanation: { noul: 0.1 } }, 'always').show).toBe(true)
     expect(decide({ kind: { choice: 'concept' }, wants_explanation: { noul: 0.9 } }, 'off').show).toBe(false)
     expect(decide({}, 'auto')).toEqual({ show: false, kind: 'other', explainP: 0 })
@@ -340,7 +370,6 @@ describe('the context', () => {
       'sessionStore',
       'auth/middleware.go',
     ])
-    expect(decide({ kind: { choice: 'lookup' }, wants_explanation: { noul: 0.9 } }, 'auto').show).toBe(false)
     expect(codeTerms('what is a monad?')).toEqual([])
   })
 
