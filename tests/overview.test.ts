@@ -340,6 +340,7 @@ describe('the context', () => {
       'sessionStore',
       'auth/middleware.go',
     ])
+    expect(decide({ kind: { choice: 'lookup' }, wants_explanation: { noul: 0.9 } }, 'auto').show).toBe(false)
     expect(codeTerms('what is a monad?')).toEqual([])
   })
 

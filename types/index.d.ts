@@ -1,5 +1,5 @@
 /** What the user is asking for, as the gate classifies it. */
-export type Kind = 'concept' | 'codebase' | 'discussion' | 'task' | 'other'
+export type Kind = 'concept' | 'codebase' | 'discussion' | 'lookup' | 'task' | 'other'
 
 export type CardStatus = 'writing' | 'ready'
 

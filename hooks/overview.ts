@@ -22,7 +22,9 @@ export const GATE_QUESTIONS = {
         'To understand a general concept, technology, algorithm or idea that is not specific to their own code.',
       codebase:
         'To understand how their own project or code works: its architecture, a module, a data flow, or why it is built the way it is. A question naming `project` (in any spelling or spacing) or one of its parts is about their own project.',
-      discussion: "Claude's opinion, a trade-off analysis, a design critique, or a brainstorm.",
+      discussion: "Claude's opinion on ideas: a trade-off analysis, a design critique, or a brainstorm.",
+      lookup:
+        'To find real-world things that need current facts or a search: places, restaurants, products, bookings, events, prices, schedules, news, or recommendations among them.',
       task: 'For Claude to do work: write or edit code, run commands, fix a bug, investigate and change something, create files, commit or deploy.',
       other: 'A short acknowledgement, chit-chat, a yes/no or one-line factual reply, or anything else.',
     },
@@ -45,7 +47,8 @@ export type GateAnswers = {
 
 export type Decision = { show: boolean; kind: Kind; explainP: number }
 
-const KINDS: readonly Kind[] = ['concept', 'codebase', 'discussion', 'task', 'other']
+const KINDS: readonly Kind[] = ['concept', 'codebase', 'discussion', 'lookup', 'task', 'other']
+// Never `lookup`: a fast model with no search would invent the places and prices it lists.
 const SHOWN: readonly Kind[] = ['concept', 'codebase', 'discussion']
 
 /**
@@ -204,6 +207,7 @@ const KIND_HINT: Record<Kind, string> = {
   codebase: "The question is about the user's own project.",
   discussion: 'The question asks for judgement. Map the considerations; do not decide.',
   task: 'The user asked for work to be done. Orient them on what the work involves.',
+  lookup: 'The user wants real-world facts you cannot check. Name only what the answer will weigh, never specific places or prices.',
   other: 'Keep the card very short.',
 }
 

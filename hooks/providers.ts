@@ -192,7 +192,7 @@ export function fallbackClassifierMessages(state: Record<string, unknown>): unkn
     {
       role: 'system',
       content:
-        'You classify a message a developer sent to an AI coding assistant. Reply with JSON only: {"kind": one of "concept" | "codebase" | "discussion" | "task" | "other", "explain": a number from 0 to 1}. kind: concept = understand a general idea; codebase = understand their own project (named in `project`); discussion = an opinion or trade-off; task = wants work done; other = anything else. explain = how likely they will sit and read a long explanatory reply.',
+        'You classify a message a developer sent to an AI coding assistant. Reply with JSON only: {"kind": one of "concept" | "codebase" | "discussion" | "lookup" | "task" | "other", "explain": a number from 0 to 1}. kind: concept = understand a general idea; codebase = understand their own project (named in `project`); discussion = an opinion or trade-off; lookup = find real-world places, products, bookings, prices or news; task = wants work done; other = anything else. explain = how likely they will sit and read a long explanatory reply.',
     },
     { role: 'user', content: JSON.stringify(state) },
   ]
