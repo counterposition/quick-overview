@@ -1,14 +1,14 @@
 {
-  "name": "fast-overview",
+  "name": "quick-overview",
   "owner": { "name": "Harish Kukreja" },
   "metadata": {
-    "description": "A fast overview card above the prompt while Claude works on a conversational question."
+    "description": "A quick overview card above the prompt while Claude works on a conversational question."
   },
   "plugins": [
     {
-      "name": "fast-overview",
+      "name": "quick-overview",
       "source": "./",
-      "description": "While Claude works on a conversational question, shows a fast overview card from a fast inference provider (Cerebras, Groq or OpenRouter)"
+      "description": "While Claude works on a conversational question, shows a quick overview card from a fast inference provider (Cerebras, Groq or OpenRouter)"
     }
   ]
 }

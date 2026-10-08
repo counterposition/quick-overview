@@ -21,7 +21,7 @@ import {
 } from '../hooks/providers'
 import type { Settings } from '../hooks/providers'
 
-const PLUGIN = 'fast-overview'
+const PLUGIN = 'quick-overview'
 const CARD = '**In short:** CRDTs merge by math, not by coordination.\n- Join semilattice'
 
 type Fetch = { url: string; body: Record<string, unknown> }

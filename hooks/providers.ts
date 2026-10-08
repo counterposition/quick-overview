@@ -130,7 +130,7 @@ export function headers(endpoint: Endpoint): Record<string, string> {
     Authorization: `Bearer ${endpoint.key}`,
     'Content-Type': 'application/json',
     // Some providers sit behind bot filters that refuse a request with no agent named.
-    'User-Agent': 'fast-overview',
+    'User-Agent': 'quick-overview',
   }
 }
 

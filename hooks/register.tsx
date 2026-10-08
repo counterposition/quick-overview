@@ -31,7 +31,7 @@ import {
 } from './providers'
 import type { Endpoint, Keys, Settings } from './providers'
 
-const current = atom({ plugin: 'fast-overview', key: 'current' } as const, null)
+const current = atom({ plugin: 'quick-overview', key: 'current' } as const, null)
 
 /** How long each call may take before the card is given up: Claude's answer would catch up. */
 const CLASSIFIER_TIMEOUT_MS = 2000
@@ -44,7 +44,7 @@ type LogLevel = 'off' | 'ratings' | 'full'
 
 type Config = Settings & { mode: Mode; shareProject: boolean; log: LogLevel; keys: Keys }
 
-/** One prompt's record, at $FAST_OVERVIEW_LOG_DIR (default ~/.local/state/fast-overview)/<date>/<id>.json. */
+/** One prompt's record, at $QUICK_OVERVIEW_LOG_DIR (default ~/.local/state/quick-overview)/<date>/<id>.json. */
 type LogRecord = {
   id: string
   at: string
@@ -118,7 +118,7 @@ async function loadConfig($: EngineInterface, options: PluginOptions): Promise<C
 function noticeOnce($: EngineInterface, key: string, line: string) {
   if (noticesShown.has(key)) return
   noticesShown.add(key)
-  $.ui.log(`fast-overview: ${line}`)
+  $.ui.log(`quick-overview: ${line}`)
 }
 
 async function save($: EngineInterface, id: string, patch: Partial<LogRecord>) {
@@ -126,7 +126,7 @@ async function save($: EngineInterface, id: string, patch: Partial<LogRecord>) {
   if (!record || !config || config.log === 'off') return
   Object.assign(record, patch)
   const home = await $.env.get('HOME')
-  const dir = (await $.env.get('FAST_OVERVIEW_LOG_DIR')) ?? (home && `${home}/.local/state/fast-overview`)
+  const dir = (await $.env.get('QUICK_OVERVIEW_LOG_DIR')) ?? (home && `${home}/.local/state/quick-overview`)
   if (!dir) return
   // At `ratings`, nothing the person or Claude wrote is kept: only verdicts, timings and the rating.
   const kept: LogRecord =
@@ -141,7 +141,7 @@ async function save($: EngineInterface, id: string, patch: Partial<LogRecord>) {
         }
   await $.fs
     .write(`${dir}/${record.at.slice(0, 10)}/${id}.json`, `${JSON.stringify(kept, null, 2)}\n`)
-    .catch(err => $.ui.log(`fast-overview: could not write log: ${String(err)}`, { to: 'debug' }))
+    .catch(err => $.ui.log(`quick-overview: could not write log: ${String(err)}`, { to: 'debug' }))
 }
 
 async function withTimeout<T>($: EngineInterface, ms: number, work: Promise<T>): Promise<T | 'timeout'> {
@@ -251,7 +251,7 @@ async function runOverview($: EngineInterface, options: PluginOptions, id: strin
     noticeOnce(
       $,
       'no-key',
-      'add an API key to see overviews: /plugin → Installed → fast-overview → Configure options. An OpenRouter key alone is enough.',
+      'add an API key to see overviews: /plugin → Installed → quick-overview → Configure options. An OpenRouter key alone is enough.',
     )
     return
   }
@@ -327,9 +327,9 @@ async function privacyNotice($: EngineInterface, endpoint: Endpoint, cfg: Config
   if (wasShown) return
   await $.store.set('privacyNoticeShown', true).catch(() => undefined)
   $.ui.log(
-    `fast-overview: overview cards are written by ${endpoint.label} from your prompt, the recent conversation` +
+    `quick-overview: overview cards are written by ${endpoint.label} from your prompt, the recent conversation` +
       `${cfg.shareProject ? ' and a snapshot of this repository' : ''}. /overview off turns them off; ` +
-      '/plugin → fast-overview → Configure options stops sharing the repository.',
+      '/plugin → quick-overview → Configure options stops sharing the repository.',
   )
 }
 
@@ -354,7 +354,7 @@ export const register: Register = (on, options) => {
     if (cfg.shareProject) void $.session.root().then(async root => projectSnapshot($, root, await $.clock.now()))
     await $.command.register({
       name: 'overview',
-      description: 'Fast overview cards: auto (a classifier decides), always, off, or no argument for the current setup',
+      description: 'Quick overview cards: auto (a classifier decides), always, off, or no argument for the current setup',
       argumentHint: '[auto|always|off]',
     })
 
@@ -370,7 +370,7 @@ export const register: Register = (on, options) => {
       const classifierLabel = classifier === 'overview-model' ? 'the overview model' : (classifier?.label ?? 'none')
 
       return {
-        text: `Fast overview is ${cfg.mode}. Cards: ${endpoint ? `${endpoint.model} on ${endpoint.label}` : 'no API key set'}. Classifier: ${classifierLabel}.`,
+        text: `Quick overview is ${cfg.mode}. Cards: ${endpoint ? `${endpoint.model} on ${endpoint.label}` : 'no API key set'}. Classifier: ${classifierLabel}.`,
       }
     }
     if (arg !== 'auto' && arg !== 'always' && arg !== 'off') {
@@ -379,11 +379,11 @@ export const register: Register = (on, options) => {
 
     const refused = await setMode($, arg)
     if (refused) {
-      return { text: `Could not change the mode (${refused}). Set it in /plugin → fast-overview → Configure options.` }
+      return { text: `Could not change the mode (${refused}). Set it in /plugin → quick-overview → Configure options.` }
     }
     if (arg === 'off') await update($, current, () => null)
 
-    return { text: `Fast overview is now ${arg}.` }
+    return { text: `Quick overview is now ${arg}.` }
   })
 
   on('prompt.submit', async ($, e, next) => {
@@ -407,7 +407,7 @@ export const register: Register = (on, options) => {
     // Started before next(e): that resolves only after the UserPromptSubmit settings hooks ran.
     void runOverview($, options, id, e.text, startedAt).catch(async err => {
       const message = err instanceof Error ? err.message : String(err)
-      $.ui.log(`fast-overview: ${message}`, { to: 'debug' })
+      $.ui.log(`quick-overview: ${message}`, { to: 'debug' })
       await update($, current, c => (c?.id === id ? null : c))
       await save($, id, { error: message })
     })

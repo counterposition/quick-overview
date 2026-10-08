@@ -1,7 +1,7 @@
 {
-  "name": "fast-overview",
-  "version": "0.2.1",
-  "description": "While Claude works on a conversational question, shows a fast overview card from a fast inference provider (Cerebras, Groq or OpenRouter)",
+  "name": "quick-overview",
+  "version": "0.3.0",
+  "description": "While Claude works on a conversational question, shows a quick overview card from a fast inference provider (Cerebras, Groq or OpenRouter)",
   "author": {
     "name": "Harish Kukreja"
   },
@@ -102,7 +102,7 @@
     "log": {
       "type": "string",
       "title": "Logging",
-      "description": "off: nothing is written and cards offer no rating. ratings: your helpful / not helpful ratings with the classifier's verdict and timings, no text. full: also prompts, cards and Claude's answers. Logs go to ~/.local/state/fast-overview.",
+      "description": "off: nothing is written and cards offer no rating. ratings: your helpful / not helpful ratings with the classifier's verdict and timings, no text. full: also prompts, cards and Claude's answers. Logs go to ~/.local/state/quick-overview.",
       "options": [
         "off",
         "ratings",

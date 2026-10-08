@@ -21,6 +21,6 @@ export type Card = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'fast-overview': { current: Card | null }
+    'quick-overview': { current: Card | null }
   }
 }
