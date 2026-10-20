@@ -10,7 +10,7 @@ A Claude Code plugin that shows a short overview card above the prompt while Cla
   Watch for: how the TS layer hands work to Rust
 ```
 
-1. **A classifier decides.** A decision model (Jev, d1, Clef or GPT-6 Luna Decisions) estimates whether you're asking to understand something and will read a long answer. Tasks ("fix X", "commit") never get a card.
+1. **A classifier decides.** A decision model (Jev, d1, Clef or GPT-6 Luna Decisions) estimates whether you're asking to understand something and will read a long answer. In the default `auto` mode, tasks ("fix X", "commit") never get a card.
 2. **A fast model writes the card.** Qwen3.8-27B on Cerebras, Groq or OpenRouter writes a one-line framing, the key ideas, an optional diagram, and the crux to watch for.
 3. **The card is grounded in your repository.** It sees a map of the directories by size; the opening of `README.md`, `AGENTS.md`, `CLAUDE.md` and the manifests; the list of documentation pages; and `rg` matches for identifiers named in the prompt.
 
