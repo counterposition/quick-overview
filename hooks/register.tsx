@@ -455,7 +455,7 @@ export const register: Register = (on, options) => {
 
     if (!card.isExpanded) {
       return (
-        <Box gap={1}>
+        <Box gap="sm">
           <Text dimColor>⚡ Quick overview ({card.kind})</Text>
           <Button key="show" hotkey="s" label="show" onPress={setExpanded(true)} />
           {ratingButtons}
@@ -469,15 +469,15 @@ export const register: Register = (on, options) => {
 
     return (
       <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
-        <Box gap={1}>
+        <Box gap="sm">
           <Text color="yellow">⚡</Text>
-          <Text bold>Quick overview</Text>
-          <Text dimColor>
+          <Text weight="semibold">Quick overview</Text>
+          <Text dimColor size="caption">
             {card.kind} · {card.source} · {seconds}s{card.isTurnDone ? '' : ' · Claude is still answering'}
           </Text>
         </Box>
         <Markdown text={card.text} />
-        <Box gap={1}>
+        <Box gap="sm">
           {card.isTurnDone ? ratingButtons : null}
           {card.isTurnDone ? (
             <Button key="collapse" hotkey="s" label="collapse" dimColor onPress={setExpanded(false)} />
