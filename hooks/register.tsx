@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, PluginOptions, Register } from 'claude-code'
 
-import type { Card, Kind } from '../types'
+import type { Kind } from '../types'
 import {
   GATE_QUESTIONS,
   KEY_FILES,
@@ -241,8 +241,7 @@ async function classify(
   return { answers: body.answers, classifier: target.label }
 }
 
-async function runOverview($: EngineInterface, options: PluginOptions, id: string, prompt: string, startedAt: number) {
-  const cfg = await loadConfig($, options)
+async function runOverview($: EngineInterface, cfg: Config, id: string, prompt: string, startedAt: number) {
   const endpoint = overviewEndpoint(cfg.keys, cfg)
   if (!endpoint) {
     noticeOnce(
@@ -402,7 +401,7 @@ export const register: Register = (on, options) => {
     await update($, current, () => null)
 
     // Started before next(e): that resolves only after the UserPromptSubmit settings hooks ran.
-    void runOverview($, options, id, e.text, startedAt).catch(async err => {
+    void runOverview($, cfg, id, e.text, startedAt).catch(async err => {
       const message = err instanceof Error ? err.message : String(err)
       $.ui.log(`quick-overview: ${message}`, { to: 'debug' })
       await update($, current, c => (c?.id === id ? null : c))
