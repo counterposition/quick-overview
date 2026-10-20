@@ -28,7 +28,7 @@ type Fetch = { url: string; body: Record<string, unknown> }
 type Gate = { kind: string; explain: number }
 
 /** The world beneath the plugin: a fake classifier and overview model, and a disk that records writes. */
-function world(on: On, gate: Gate, { cardDelayMs = 0, status = 200 } = {}) {
+function world(on: On, gate: Gate, { gateDelayMs = 0, cardDelayMs = 0, status = 200 } = {}) {
   const fetches: Fetch[] = []
   const writes = new Map<string, string>()
   const lines: string[] = []
@@ -51,7 +51,8 @@ function world(on: On, gate: Gate, { cardDelayMs = 0, status = 200 } = {}) {
         : JSON.parse(e.init?.body ?? '{}').max_tokens === 40
           ? { choices: [{ message: { content: JSON.stringify({ kind: gate.kind, explain: gate.explain }) } }] }
           : { choices: [{ message: { content: CARD } }] }
-    if (cardDelayMs > 0 && e.url.includes('chat/completions')) await clock.sleep(cardDelayMs)
+    const delayMs = e.url.includes('chat/completions') ? cardDelayMs : gateDelayMs
+    if (delayMs > 0) await clock.sleep(delayMs)
 
     return { value: { status: 200, ok: true, headers: {}, text: JSON.stringify(json) } }
   })
@@ -253,6 +254,32 @@ describe('the band', () => {
     expect(fetches[0]?.body).toMatchObject({ model: 'gpt-6-luna', questions: [{ type: 'choice', name: 'kind' }, { type: 'predicate' }] })
     const ui = await $.ui.mount(band)
     expect((await ui.find({ type: 'Markdown' }))?.text).toContain('CRDTs merge by math')
+  })
+
+  test('shows no card once Claude has finished', { options: DIRECT }, async ($, on) => {
+    const { logs, clock } = world(on, { kind: 'concept', explain: 0.8 }, { gateDelayMs: 1_000 })
+
+    await $.prompt.submit(submit('How do CRDTs converge?'))
+    await $.turn.complete({ answer: 'Quick.', durationMs: 500, isAborted: false, turnId: 't1', reason: 'answer' })
+    await clock.advance(1_000)
+
+    const ui = await $.ui.mount(band)
+    expect(await ui.find({ type: 'Text' })).toBeUndefined()
+    expect(logs().at(-1)).toMatchObject({ shown: false, claude: { answer: 'Quick.' } })
+  })
+
+  test('keeps each answer with its own prompt', { options: DIRECT }, async ($, on) => {
+    const { logs, clock } = world(on, { kind: 'concept', explain: 0.8 })
+
+    await $.prompt.submit(submit('How do CRDTs converge?'))
+    await clock.settle()
+    await $.turn.complete({ answer: 'The long answer.', durationMs: 9000, isAborted: false, turnId: 't1', reason: 'answer' })
+    await $.prompt.submit({ ...submit('Continue from where you stopped.'), isMeta: true })
+    await $.turn.complete({ answer: 'More.', durationMs: 100, isAborted: false, turnId: 't2', reason: 'answer' })
+    await clock.settle()
+
+    expect(logs()).toHaveLength(1)
+    expect(logs()[0]).toMatchObject({ claude: { answer: 'The long answer.' } })
   })
 
   test('gives up on a card that takes too long', { options: DIRECT }, async ($, on) => {

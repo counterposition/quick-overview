@@ -272,6 +272,8 @@ async function runOverview($: EngineInterface, options: PluginOptions, id: strin
   )
   if (gate === 'timeout') throw new Error(`the classifier took over ${CLASSIFIER_TIMEOUT_MS} ms`)
   const decision = decide(gate.answers, cfg.mode, cfg.shareProject && namesProject(prompt, name))
+  // A newer prompt, or the end of Claude's turn, makes this card no use any more.
+  const isShown = decision.show && latestId === id
   await save($, id, {
     gate: {
       classifier: gate.classifier,
@@ -280,9 +282,9 @@ async function runOverview($: EngineInterface, options: PluginOptions, id: strin
       explainP: decision.explainP,
       ms: (await $.clock.now()) - gateStarted,
     },
-    shown: decision.show,
+    shown: isShown,
   })
-  if (!decision.show || latestId !== id) return
+  if (!isShown) return
 
   await update($, current, () => ({
     id,
@@ -418,8 +420,9 @@ export const register: Register = (on, options) => {
 
   on('turn.complete', async ($, e, next) => {
     const id = latestId
-    if (e.agentId === undefined && id !== undefined && records.has(id)) {
-      // A card still being written when Claude finishes is no use any more.
+    if (e.agentId === undefined && id !== undefined) {
+      // The answer belongs to this prompt alone, and a card still pending is no use any more.
+      latestId = undefined
       await update($, current, c =>
         c?.id !== id ? c : e.isAborted || c.status === 'writing' ? null : { ...c, isTurnDone: true, isExpanded: false },
       )
