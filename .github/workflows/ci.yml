@@ -24,9 +24,5 @@ jobs:
       - run: npm install --global @anthropic-ai/claude-code@${{ matrix.claude-code }}
       - run: claude plugin validate --strict .
       - run: claude plugin test .
-      - name: Type-check
-        run: |
-          # The engine writes its type declarations into .claude-plugin/types whenever it loads
-          # the plugin, and a session with no login still loads it before stopping.
-          timeout 60 claude -p --plugin-dir . "ok" || true
-          npx --yes --package typescript@5 tsc -p .
+      # No type-check here: the engine writes the API's type declarations only into a folder an
+      # interactive session loads (README → Develop), never under `claude -p`.

@@ -65,4 +65,7 @@ By default the plugin keeps only your ratings, with the classifier's verdict and
 claude --plugin-dir .          # load from this folder; keys can live in ./.env
 claude plugin validate --strict .
 claude plugin test .
+npx --package typescript@5 tsc -p .   # type-check; CI cannot
 ```
+
+The type-check reads the API declarations that an interactive `claude --plugin-dir .` session writes into `.claude-plugin/types/`; run one first, with the Claude Code version you're targeting.
