@@ -1,7 +1,7 @@
 // Pure logic for the overview: the gate, the context the overview model reads,
 // and the messages it is sent. Nothing here touches `$`, so tests run it directly.
 
-import type { SessionMessage } from 'claude-code'
+import type { PromptSubmitInput, SessionMessage } from 'claude-code'
 
 import type { Kind } from '../types'
 
@@ -75,11 +75,26 @@ export function decide(answers: GateAnswers, mode: Mode, isAboutProject = false)
   return { show: SHOWN.includes(kind) && explainP >= EXPLAIN_THRESHOLD, kind, explainP }
 }
 
-/** Prompts not worth a classifier call: slash commands, shell escapes, one-word replies. */
-export function isTrivial(prompt: string): boolean {
-  const text = prompt.trim()
+// Prompts from a person: the terminal, Remote Control, and an SDK host such as the desktop app.
+const PERSON_ORIGINS: readonly string[] = ['composer', 'bridge', 'sdk']
 
-  return text.length < 8 || text.startsWith('/') || text.startsWith('!')
+/**
+ * Whether a submitted prompt is worth a classifier call: a new prompt from a person's surface, and
+ * not a slash command, a prompt sent on their behalf that they never saw, a shell escape or a reply
+ * under eight characters.
+ */
+export function isEligible(e: PromptSubmitInput, mode: Mode): boolean {
+  const text = e.text.trim()
+
+  return (
+    mode !== 'off' &&
+    e.turnId === undefined &&
+    e.command === undefined &&
+    !e.isMeta &&
+    PERSON_ORIGINS.includes(e.origin.kind) &&
+    text.length >= 8 &&
+    !text.startsWith('!')
+  )
 }
 
 export function clip(text: string, max: number): string {

@@ -14,7 +14,7 @@ jobs:
       matrix:
         # The pinned build is the one the plugin is tested against; `latest` warns early
         # when the early-access function-hooks API changes under it.
-        claude-code: ['2.1.292', 'latest']
+        claude-code: ['2.1.305', 'latest']
     continue-on-error: ${{ matrix.claude-code == 'latest' }}
     steps:
       - uses: actions/checkout@v5

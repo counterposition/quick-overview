@@ -24,7 +24,7 @@ The card usually appears within a second, while Claude is still thinking.
 
 Paste **one API key** when asked. An [OpenRouter](https://openrouter.ai/keys) key alone is enough: it reaches the overview model and every classifier. Leave the other key fields empty unless you have those keys.
 
-Requires Claude Code 2.1.292 or later. Plugins built from function hooks are an early-access API that may change between releases. Some earlier builds only loaded them with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
+Requires Claude Code 2.1.305 or later. Plugins built from function hooks are an early-access API that may change between releases. Some earlier builds only loaded them with `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
 
 ## Keys and speed
 
@@ -51,7 +51,7 @@ You can also set keys as environment variables: `OPENROUTER_API_KEY`, `CEREBRAS_
 
 ## Privacy
 
-For prompts that qualify, the card provider receives your prompt, the recent conversation and, unless you turn off **Share project context**, the repository snapshot (file paths and the openings of the key files). For every prompt that isn't a slash command or one word, the classifier receives the prompt and a short excerpt of the conversation. If you use OpenRouter, it sees the same and passes it on. Check each provider's data-retention policy.
+For prompts that qualify, the card provider receives your prompt, the recent conversation and, unless you turn off **Share project context**, the repository snapshot (file paths and the openings of the key files). For every prompt you type while Claude is idle, other than a slash command, a `!` shell command or a reply under eight characters, the classifier receives the prompt and a short excerpt of the conversation. If you use OpenRouter, it sees the same and passes it on. Check each provider's data-retention policy.
 
 By default the plugin keeps only your ratings, with the classifier's verdict and timings: no prompts, cards or answers. Set logging to **full** to also keep those, or **off** to keep nothing (cards then offer no rating). Logs go to `~/.local/state/quick-overview/`, or `$QUICK_OVERVIEW_LOG_DIR`.
 

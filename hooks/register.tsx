@@ -12,7 +12,7 @@ import {
   decide,
   docsIndex,
   formatConversation,
-  isTrivial,
+  isEligible,
   namesProject,
   parseDotenv,
   repoMap,
@@ -58,9 +58,6 @@ type LogRecord = {
   claude?: { answer: string; durationMs: number; isAborted: boolean }
   rating?: Rating
 }
-
-// Prompts from a person: the terminal, Remote Control, and an SDK host such as the desktop app.
-const PERSON_ORIGINS = new Set(['composer', 'bridge', 'sdk'])
 
 let config: Config | undefined
 // The prompt whose card is in flight or on screen; a newer prompt supersedes it.
@@ -388,9 +385,7 @@ export const register: Register = (on, options) => {
 
   on('prompt.submit', async ($, e, next) => {
     const cfg = await loadConfig($, options)
-    const isEligible =
-      e.turnId === undefined && PERSON_ORIGINS.has(e.origin.kind) && cfg.mode !== 'off' && !isTrivial(e.text)
-    if (!isEligible) return next(e)
+    if (!isEligible(e, cfg.mode)) return next(e)
 
     const startedAt = await $.clock.now()
     const id = `${new Date(startedAt).toISOString().replace(/[:.]/g, '-')}-${Math.random().toString(36).slice(2, 6)}`

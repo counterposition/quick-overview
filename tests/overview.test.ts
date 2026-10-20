@@ -7,7 +7,7 @@ import {
   decide,
   docsIndex,
   formatConversation,
-  isTrivial,
+  isEligible,
   namesProject,
   parseDotenv,
   repoMap,
@@ -180,6 +180,16 @@ describe('the band', () => {
     expect(fetches).toHaveLength(1)
     const ui = await $.ui.mount(band)
     expect(await ui.find({ type: 'Markdown' })).toBeUndefined()
+  })
+
+  test('asks nobody about a prompt the person never saw', { options: DIRECT }, async ($, on) => {
+    const { fetches, clock } = world(on, { kind: 'concept', explain: 0.9 })
+
+    // Only the engine sets isMeta; the kit passes the field through as given.
+    await $.prompt.submit({ ...submit('How do CRDTs converge?'), isMeta: true })
+    await clock.settle()
+
+    expect(fetches).toHaveLength(0)
   })
 
   test('grounds a codebase question in the project', { options: DIRECT }, async ($, on) => {
@@ -355,11 +365,19 @@ describe('the gate', () => {
     expect(namesProject('what is a model?', 'mod')).toBe(false)
   })
 
-  test('skips slash commands, shell escapes and one-word replies without asking anyone', () => {
-    expect(isTrivial('/compact')).toBe(true)
-    expect(isTrivial('! ls')).toBe(true)
-    expect(isTrivial('thanks')).toBe(true)
-    expect(isTrivial('why is the sky blue?')).toBe(false)
+  test('asks only about new prompts a person typed', () => {
+    const typed = submit('why is the sky blue?')
+    expect(isEligible(typed, 'auto')).toBe(true)
+    expect(isEligible(submit('/etc/hosts: why is localhost listed twice?'), 'auto')).toBe(true)
+    expect(isEligible({ ...typed, origin: { kind: 'bridge' } }, 'always')).toBe(true)
+
+    expect(isEligible(typed, 'off')).toBe(false)
+    expect(isEligible({ ...submit('/learn CRDTs'), command: { name: 'learn', args: 'CRDTs' } }, 'auto')).toBe(false)
+    expect(isEligible({ ...typed, isMeta: true }, 'auto')).toBe(false)
+    expect(isEligible({ ...typed, turnId: 't1' }, 'auto')).toBe(false)
+    expect(isEligible({ ...typed, origin: { kind: 'plugin', name: 'other' } }, 'auto')).toBe(false)
+    expect(isEligible(submit('! ls -la src'), 'auto')).toBe(false)
+    expect(isEligible(submit('thanks'), 'auto')).toBe(false)
   })
 })
 
