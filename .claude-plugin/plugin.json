@@ -6,6 +6,16 @@
     "name": "Harish Kukreja"
   },
   "types": "./types/index.d.ts",
+  "network": {
+    "hosts": [
+      "api.cerebras.ai",
+      "api.groq.com",
+      "openrouter.ai",
+      "api.typesafe.ai",
+      "api.liquid.ai",
+      "api.openai.com"
+    ]
+  },
   "userConfig": {
     "openrouter_api_key": {
       "type": "string",

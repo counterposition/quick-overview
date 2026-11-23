@@ -37,7 +37,9 @@ function world(on: On, gate: Gate, { gateDelayMs = 0, cardDelayMs = 0, status = 
   const clock = mock.clock(on, { now: 1_000 })
 
   on('http.fetch', async ($, e) => {
-    fetches.push({ url: e.url, body: JSON.parse(e.init?.body ?? '{}') })
+    // A body may be bytes (`{ base64 }`) since 2.1.330; the plugin sends only JSON text.
+    const sent = JSON.parse(typeof e.init?.body === 'string' ? e.init.body : '{}') as Record<string, unknown>
+    fetches.push({ url: e.url, body: sent })
     if (status !== 200) return { value: { status, ok: false, headers: {}, text: '{"error":"nope"}' } }
     const json = e.url.includes('openai.com/v1/decisions')
       ? {
@@ -48,7 +50,7 @@ function world(on: On, gate: Gate, { gateDelayMs = 0, cardDelayMs = 0, status = 
         }
       : e.url.includes('systemone')
         ? { answers: { kind: { choice: gate.kind, confidence: 0.99 }, wants_explanation: { noul: gate.explain } } }
-        : JSON.parse(e.init?.body ?? '{}').max_tokens === 40
+        : sent.max_tokens === 40
           ? { choices: [{ message: { content: JSON.stringify({ kind: gate.kind, explain: gate.explain }) } }] }
           : { choices: [{ message: { content: CARD } }] }
     const delayMs = e.url.includes('chat/completions') ? cardDelayMs : gateDelayMs
@@ -90,6 +92,7 @@ const band = {
   component: 'AbovePrompt',
   props: {
     hasSurvey: false,
+    isCollapsed: false,
     isWorking: true,
     maxRows: 20,
     bodyColumns: 80,
