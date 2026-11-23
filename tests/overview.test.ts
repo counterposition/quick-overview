@@ -175,6 +175,23 @@ describe('the band', () => {
     expect(await desktop.find({ text: 'ctrl+x tab' })).toBeUndefined()
   })
 
+  test('keeps the controls above the card, where a scrolled band still shows them', { options: DIRECT }, async ($, on) => {
+    const { clock } = world(on, { kind: 'concept', explain: 0.8 })
+
+    await $.prompt.submit(submit('How do CRDTs converge?'))
+    await clock.settle()
+    const ui = await $.ui.mount(band)
+    const before = (drawn: string, key: string) => drawn.indexOf(`"${key}"`) < drawn.indexOf('CRDTs merge by math')
+
+    expect(before(JSON.stringify(await ui.drawn()), 'dismiss')).toBe(true)
+
+    await $.turn.complete({ answer: 'x', durationMs: 1, isAborted: false, turnId: 't1', reason: 'answer' })
+    await clock.settle()
+    await ui.press({ key: 'show' })
+    const drawn = JSON.stringify(await ui.drawn())
+    for (const key of ['helpful', 'not-helpful', 'collapse', 'dismiss']) expect(before(drawn, key)).toBe(true)
+  })
+
   test('stays empty for a task, and never asks for a card', { options: DIRECT }, async ($, on) => {
     const { fetches, clock } = world(on, { kind: 'task', explain: 0.2 })
 

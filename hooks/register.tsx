@@ -469,6 +469,8 @@ export const register: Register = (on, options) => {
 
     const seconds = (card.elapsedMs / 1000).toFixed(1)
 
+    // The controls sit above the card: a card taller than the band scrolls from the top, and a
+    // Button scrolled out of view can be neither seen nor pressed by its hotkey.
     return (
       <Box flexDirection="column" borderStyle="round" borderDimColor paddingX={1}>
         <Box gap="sm">
@@ -478,7 +480,6 @@ export const register: Register = (on, options) => {
             {card.kind} · {card.source} · {seconds}s{card.isTurnDone ? '' : ' · Claude is still answering'}
           </Text>
         </Box>
-        <Markdown text={card.text} />
         <Box gap="sm">
           {card.isTurnDone ? ratingButtons : null}
           {card.isTurnDone ? (
@@ -487,6 +488,7 @@ export const register: Register = (on, options) => {
           <Button key="dismiss" hotkey="x" label="dismiss" role="dismiss" dimColor onPress={dismiss} />
           {keysHint}
         </Box>
+        <Markdown text={card.text} />
       </Box>
     )
   })
